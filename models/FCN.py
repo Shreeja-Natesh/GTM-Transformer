@@ -147,8 +147,9 @@ class TextEmbedder(nn.Module):
         word_embeddings = torch.stack(word_embeddings).to('cuda:'+str(self.gpu_num))
         
         # Embed to our embedding space
-        word_embeddings = self.dropout(self.fc(word_embeddings))
-
+        # word_embeddings = self.dropout(self.fc(word_embeddings))
+        word_embeddings = self.fc(self.dropout(word_embeddings))
+        
         return word_embeddings
 
 class ImageEmbedder(nn.Module):
