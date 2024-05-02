@@ -94,7 +94,7 @@ def run(args):
     # tb_logger = pl_loggers.TensorBoardLogger(args.log_dir+'/', name=model_savename)
     trainer = pl.Trainer(
                          #gpus=[args.gpu_num],
-                         devices=1,
+                         devices=args.gpu_num,
                          accelerator="gpu",
                          max_epochs=args.epochs,
                          check_val_every_n_epoch=5,
