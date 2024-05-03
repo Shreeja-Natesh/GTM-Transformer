@@ -104,14 +104,14 @@ def run(args):
                          logger=wandb_logger,
                          callbacks=[checkpoint_callback])
     
-    print('\nModel Fitting!\n')
+    #print('\nModel Fitting!\n')
     # Fit model
     trainer.fit(model, train_dataloaders=train_loader,
                 val_dataloaders=test_loader)
     
-    print('\nModel Training!\n')
+    #print('\nModel Training!\n')
     # Print out path of best model
-    print(checkpoint_callback.best_model_path)
+    #print(checkpoint_callback.best_model_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Zero-shot sales forecasting')
