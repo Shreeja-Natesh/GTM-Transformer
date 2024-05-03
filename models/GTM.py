@@ -310,12 +310,21 @@ class GTM(pl.LightningModule):
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
         loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
         self.log('train_loss', loss)
-
+        print(f'train_loss: {loss}')
         return loss
 
     def validation_step(self, test_batch, batch_idx):
         item_sales, category, color, fabric, temporal_features, gtrends, images = test_batch 
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
+        
+        rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
+        loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
+        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        self.log('val_mae', mae)
+        self.log('val_loss', loss)
+
+        print(f'val_mae: {mae}')
+        print(f'val_loss: {loss}')
         
         return item_sales.squeeze(), forecasted_sales.squeeze()
         
