@@ -332,11 +332,6 @@ class GTM(pl.LightningModule):
             return  # Exit the method early
 
         print("Validation Outputs Length:", len(self.validation_outputs))
-        if not self.validation_outputs:
-            print("Warning: No validation data was processed.")
-            self.log('val_mae', torch.tensor(float('nan')))
-            self.log('val_loss', torch.tensor(float('nan')))
-            return  # Exit early if validation_outputs is empty
     
         # Attempt to process self.validation_outputs
         try:
