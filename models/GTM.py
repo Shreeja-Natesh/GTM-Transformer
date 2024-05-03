@@ -204,6 +204,7 @@ class TransformerDecoderLayer(nn.Module):
         super(TransformerDecoderLayer, self).__init__()
         
         self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = self.multihead_attn
 
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -223,7 +224,7 @@ class TransformerDecoderLayer(nn.Module):
         super(TransformerDecoderLayer, self).__setstate__(state)
 
     def forward(self, tgt, memory, tgt_mask = None, memory_mask = None, tgt_key_padding_mask = None, 
-            memory_key_padding_mask = None):
+            memory_key_padding_mask = None, tgt_is_causal=False, memory_is_causal=False):
 
         tgt2, attn_weights = self.multihead_attn(tgt, memory, memory)
         tgt = tgt + self.dropout2(tgt2)
@@ -237,6 +238,9 @@ class GTM(pl.LightningModule):
     def __init__(self, embedding_dim, hidden_dim, output_dim, num_heads, num_layers, use_text, use_img, \
                 cat_dict, col_dict, fab_dict, trend_len, num_trends, gpu_num, use_encoder_mask=1, autoregressive=False):
         super().__init__()
+        
+        self.validation_outputs = []
+        
         self.hidden_dim = hidden_dim
         self.embedding_dim = embedding_dim
         self.output_len = output_dim
@@ -319,22 +323,75 @@ class GTM(pl.LightningModule):
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
         loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
         self.log('train_loss', loss)
-
+        print(f'train_loss: {loss}')
         return loss
 
     def validation_step(self, test_batch, batch_idx):
         item_sales, category, color, fabric, temporal_features, gtrends, images = test_batch 
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
         
-        return item_sales.squeeze(), forecasted_sales.squeeze()
-
-    def validation_epoch_end(self, val_step_outputs):
-        item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
-        item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
         rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
         loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
-        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales.squeeze())
         self.log('val_mae', mae)
         self.log('val_loss', loss)
 
-        print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+        print(f'val_mae: {mae}')
+        print(f'val_loss: {loss}')
+        
+        return item_sales.squeeze(), forecasted_sales.squeeze()
+        
+    # def validation_step_end(self, val_step_outputs):
+    #         self.validation_outputs.append(val_step_outputs)
+        
+    # def on_validation_epoch_end(self):#, val_step_outputs):
+
+        # if not self.validation_outputs:  # Check if the list is empty
+           # print("Warning: No validation data was processed.")
+           # # Optionally, log default metrics to indicate missing validation data
+           # self.log('val_mae', torch.tensor(float('nan')))
+           # self.log('val_loss', torch.tensor(float('nan')))
+           # return  # Exit the method early
+
+        # print("Validation Outputs Length:", len(self.validation_outputs))
+
+        # item_sales, forecasted_sales = zip(*self.validation_outputs)
+        # item_sales = torch.stack(item_sales)
+        # forecasted_sales = torch.stack(forecasted_sales)
+        
+        # #item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
+        # #item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
+        
+        # rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
+        # loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
+        # mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        # self.log('val_mae', mae)
+        # self.log('val_loss', loss)
+
+        # print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+        
+        ## Attempt to process self.validation_outputs
+        #try:
+        #    item_sales, forecasted_sales = zip(*self.validation_outputs)
+        #    item_sales = torch.stack(item_sales)
+        #    forecasted_sales = torch.stack(forecasted_sales)
+        #    
+        #    #item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
+        #    #item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
+        #    
+        #    rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
+        #    loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
+        #    mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        #    self.log('val_mae', mae)
+        #    self.log('val_loss', loss)
+    
+           # print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+           # self.validation_outputs = []
+        
+        # except Exception as e:
+           # print(f"Error processing validation outputs: {e}")
+           # # Handle or log the error appropriately
+        
+
+        
+
