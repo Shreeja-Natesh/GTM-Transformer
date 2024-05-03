@@ -81,9 +81,10 @@ def run(args):
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         dirpath=args.log_dir + '/'+args.model_type,
         filename=model_savename+'---{epoch}---'+dt_string,
-        monitor='val_mae',
-        mode='min',
-        save_top_k=1,
+        every_n_epochs=1,
+        #monitor='val_mae',
+        #mode='min',
+        #save_top_k=1,
         verbose=True
     )
 
@@ -91,6 +92,7 @@ def run(args):
     wandb_logger = pl_loggers.WandbLogger()
     wandb_logger.watch(model)
 
+    print('\nModel Training!\n')
     # If you wish to use Tensorboard you can change the logger to:
     # tb_logger = pl_loggers.TensorBoardLogger(args.log_dir+'/', name=model_savename)
     trainer = pl.Trainer(
@@ -101,11 +103,13 @@ def run(args):
                          check_val_every_n_epoch=1,
                          logger=wandb_logger,
                          callbacks=[checkpoint_callback])
-
+    
+    print('\nModel Fitting!\n')
     # Fit model
     trainer.fit(model, train_dataloaders=train_loader,
                 val_dataloaders=test_loader)
-
+    
+    print('\nModel Training!\n')
     # Print out path of best model
     print(checkpoint_callback.best_model_path)
 
