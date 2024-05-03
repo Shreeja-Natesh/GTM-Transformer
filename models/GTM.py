@@ -236,7 +236,7 @@ class TransformerDecoderLayer(nn.Module):
 
 class GTM(pl.LightningModule):
     def __init__(self, embedding_dim, hidden_dim, output_dim, num_heads, num_layers, use_text, use_img, \
-                cat_dict, col_dict, fab_dict, trend_len, num_trends, gpu_num, use_encoder_mask=1, autoregressive=False, optimizer_type):
+                cat_dict, col_dict, fab_dict, trend_len, num_trends, gpu_num, optimizer_type, use_encoder_mask=1, autoregressive=False):
         super().__init__()
         
         self.validation_outputs = []
