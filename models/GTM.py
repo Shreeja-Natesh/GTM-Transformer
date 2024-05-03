@@ -222,7 +222,7 @@ class TransformerDecoderLayer(nn.Module):
         super(TransformerDecoderLayer, self).__setstate__(state)
 
     def forward(self, tgt, memory, tgt_mask = None, memory_mask = None, tgt_key_padding_mask = None, 
-            memory_key_padding_mask = None):
+            memory_key_padding_mask = None, tgt_is_causal=False, memory_is_causal=False):
 
         tgt2, attn_weights = self.multihead_attn(tgt, memory, memory)
         tgt = tgt + self.dropout2(tgt2)
