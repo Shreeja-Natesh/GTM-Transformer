@@ -133,6 +133,8 @@ if __name__ == '__main__':
     parser.add_argument('--wandb_entity', type=str, default='username-here')
     parser.add_argument('--wandb_proj', type=str, default='GTM')
     parser.add_argument('--wandb_run', type=str, default='Run1')
+    parser.add_argument('--optimizer_type', type=str, default='Adafactor', help="Optimizer type: 'Adafactor', 'AdamW', 'Adam' or 'SGD'")
+
 
     args = parser.parse_args()
     run(args)
