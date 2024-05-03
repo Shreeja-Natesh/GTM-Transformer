@@ -319,7 +319,7 @@ class GTM(pl.LightningModule):
         
         rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
         loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
-        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales.squeeze())
         self.log('val_mae', mae)
         self.log('val_loss', loss)
 
