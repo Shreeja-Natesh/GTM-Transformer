@@ -296,10 +296,17 @@ class GTM(pl.LightningModule):
         return forecast.view(-1, self.output_len), attn_weights
 
     def configure_optimizers(self):
-        optimizer = Adafactor(self.parameters(),scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
-    
+        if self.optimizer_type == 'Adafactor':
+            optimizer = Adafactor(self.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
+        elif self.optimizer_type == 'AdamW':
+            optimizer = AdamW(self.parameters(), lr=1e-3)
+        elif self.optimizer_type == 'SGD':
+            optimizer = optim.SGD(self.parameters(), lr=lr, momentum=0.9)
+        else:
+            raise ValueError(f"Unsupported optimizer type: {self.optimizer_type}")
+        #optimizer = Adafactor(self.parameters(),scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
         return [optimizer]
-
+        
 
     def training_step(self, train_batch, batch_idx):
         item_sales, category, color, fabric, temporal_features, gtrends, images = train_batch 
