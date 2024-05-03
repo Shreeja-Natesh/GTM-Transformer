@@ -83,7 +83,8 @@ def run(args):
         filename=model_savename+'---{epoch}---'+dt_string,
         monitor='val_mae',
         mode='min',
-        save_top_k=1
+        save_top_k=1,
+        verbose=True
     )
 
     wandb.init(entity=args.wandb_entity, project=args.wandb_proj, name=args.wandb_run)
@@ -97,7 +98,7 @@ def run(args):
                          devices=1,
                          accelerator="gpu",
                          max_epochs=args.epochs,
-                         check_val_every_n_epoch=5,
+                         check_val_every_n_epoch=1,
                          logger=wandb_logger,
                          callbacks=[checkpoint_callback])
 
@@ -107,7 +108,6 @@ def run(args):
 
     # Print out path of best model
     print(checkpoint_callback.best_model_path)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Zero-shot sales forecasting')
