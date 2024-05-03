@@ -236,6 +236,9 @@ class GTM(pl.LightningModule):
     def __init__(self, embedding_dim, hidden_dim, output_dim, num_heads, num_layers, use_text, use_img, \
                 cat_dict, col_dict, fab_dict, trend_len, num_trends, gpu_num, use_encoder_mask=1, autoregressive=False):
         super().__init__()
+        
+        self.validation_outputs = []
+        
         self.hidden_dim = hidden_dim
         self.embedding_dim = embedding_dim
         self.output_len = output_dim
@@ -351,6 +354,7 @@ class GTM(pl.LightningModule):
             self.log('val_loss', loss)
     
             print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+            self.validation_outputs = []
         
         except Exception as e:
             print(f"Error processing validation outputs: {e}")
