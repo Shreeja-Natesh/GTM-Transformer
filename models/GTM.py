@@ -6,6 +6,8 @@ import pytorch_lightning as pl
 from transformers import pipeline
 from torchvision import models
 from fairseq.optim.adafactor import Adafactor
+from transformers import AdamW
+import torch.optim as optim
 
 
 class PositionalEncoding(nn.Module):
@@ -296,10 +298,14 @@ class GTM(pl.LightningModule):
         return forecast.view(-1, self.output_len), attn_weights
 
     def configure_optimizers(self):
+        lr = 1e-3
+        
         if self.optimizer_type == 'Adafactor':
             optimizer = Adafactor(self.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
+        elif self.optimizer_type == 'Adam':
+            optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=lr* 1e-2)
         elif self.optimizer_type == 'AdamW':
-            optimizer = AdamW(self.parameters(), lr=1e-3)
+            optimizer = AdamW(self.parameters(), lr=lr)
         elif self.optimizer_type == 'SGD':
             optimizer = optim.SGD(self.parameters(), lr=lr, momentum=0.9)
         else:
