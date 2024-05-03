@@ -315,7 +315,10 @@ class GTM(pl.LightningModule):
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
         
         return item_sales.squeeze(), forecasted_sales.squeeze()
-
+        
+    def validation_step_end(self, val_step_outputs):
+            self.validation_outputs.append(val_step_outputs)
+        
     def on_validation_epoch_end(self):#, val_step_outputs):
 
         if not self.validation_outputs:  # Check if the list is empty
