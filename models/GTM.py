@@ -332,28 +332,43 @@ class GTM(pl.LightningModule):
             return  # Exit the method early
 
         print("Validation Outputs Length:", len(self.validation_outputs))
-    
-        # Attempt to process self.validation_outputs
-        try:
-            item_sales, forecasted_sales = zip(*self.validation_outputs)
-            item_sales = torch.stack(item_sales)
-            forecasted_sales = torch.stack(forecasted_sales)
-            
-            #item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
-            #item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
-            
-            rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
-            loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
-            mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
-            self.log('val_mae', mae)
-            self.log('val_loss', loss)
-    
-            print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
-            self.validation_outputs = []
+
+        item_sales, forecasted_sales = zip(*self.validation_outputs)
+        item_sales = torch.stack(item_sales)
+        forecasted_sales = torch.stack(forecasted_sales)
         
-        except Exception as e:
-            print(f"Error processing validation outputs: {e}")
-            # Handle or log the error appropriately
+        #item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
+        #item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
+        
+        rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
+        loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
+        mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        self.log('val_mae', mae)
+        self.log('val_loss', loss)
+
+        print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+        
+        ## Attempt to process self.validation_outputs
+        #try:
+        #    item_sales, forecasted_sales = zip(*self.validation_outputs)
+        #    item_sales = torch.stack(item_sales)
+        #    forecasted_sales = torch.stack(forecasted_sales)
+        #    
+        #    #item_sales, forecasted_sales = [x[0] for x in val_step_outputs], [x[1] for x in val_step_outputs]
+        #    #item_sales, forecasted_sales = torch.stack(item_sales), torch.stack(forecasted_sales)
+        #    
+        #    rescaled_item_sales, rescaled_forecasted_sales = item_sales*1065, forecasted_sales*1065 # 1065 is the normalization factor (max of the sales of the training set)
+        #    loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
+        #    mae = F.l1_loss(rescaled_item_sales, rescaled_forecasted_sales)
+        #    self.log('val_mae', mae)
+        #    self.log('val_loss', loss)
+    
+           # print('Validation MAE:', mae.detach().cpu().numpy(), 'LR:', self.optimizers().param_groups[0]['lr'])
+           # self.validation_outputs = []
+        
+        # except Exception as e:
+           # print(f"Error processing validation outputs: {e}")
+           # # Handle or log the error appropriately
         
 
         
