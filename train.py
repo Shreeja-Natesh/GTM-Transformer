@@ -69,7 +69,8 @@ def run(args):
             num_trends=args.num_trends,
             use_encoder_mask=args.use_encoder_mask,
             autoregressive=args.autoregressive,
-            gpu_num=args.gpu_num
+            gpu_num=args.gpu_num,
+            optimizer_type=args.optimizer_type,
         )
 
     # Model Training
