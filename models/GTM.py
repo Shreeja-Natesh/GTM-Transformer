@@ -324,7 +324,7 @@ class GTM(pl.LightningModule):
         forecasted_sales, _ = self.forward(category, color, fabric, temporal_features, gtrends, images)
         # loss = F.mse_loss(item_sales, forecasted_sales.squeeze())
         # HUBER LOSS
-        beta_value = 0.3
+        beta_value = 1.0
         loss = F.smooth_l1_loss(item_sales, forecasted_sales.squeeze(), beta=beta_value)
         self.log('train_loss', loss)
         print(f'train_loss: {loss}')
