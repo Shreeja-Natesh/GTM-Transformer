@@ -81,9 +81,9 @@ class ZeroShotDataset():
         data_with_gtrends = self.preprocess_data()
         data_loader = None
         if train:
-            data_loader = DataLoader(data_with_gtrends, batch_size=batch_size, shuffle=True, num_workers=4)
+            data_loader = DataLoader(data_with_gtrends, batch_size=batch_size, shuffle=True, num_workers=1)
         else:
-            data_loader = DataLoader(data_with_gtrends, batch_size=1, shuffle=False, num_workers=4)
+            data_loader = DataLoader(data_with_gtrends, batch_size=1, shuffle=False, num_workers=1)
         print('Done.')
 
         return data_loader
